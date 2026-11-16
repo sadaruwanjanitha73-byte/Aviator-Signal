@@ -1,367 +1,175 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="si">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviator Predictor</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-        body {
-            background-color: #121212;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .phone-container {
-            width: 100%;
-            max-width: 400px;
-            height: 100%;
-            max-height: 850px;
-            background: #ffffff;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            position: relative;
-            overflow: hidden;
-        }
-        @media (min-width: 401px) {
-            .phone-container {
-                border-radius: 30px;
-                border: 10px solid #222;
-                height: 90vh;
-            }
-        }
-        .top-bar {
-            background-color: #d32f2f;
-            color: white;
-            text-align: center;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            position: relative;
-        }
-        .content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 15px;
-            position: relative;
-            overflow-y: auto;
-        }
-        .plane-box {
-            margin: 15px 0;
-            text-align: center;
-        }
-        .plane-box svg {
-            width: 200px;
-            height: auto;
-            fill: #d32f2f;
-            animation: floatPlane 2s ease-in-out infinite;
-            filter: drop-shadow(0px 5px 8px rgba(211, 47, 47, 0.3));
-        }
-        @keyframes floatPlane {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(-2deg); }
-        }
-        .radar-circle {
-            width: 180px;
-            height: 180px;
-            border: 4px solid #d32f2f;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: 0 0 20px rgba(211, 47, 47, 0.25);
-            margin-bottom: 20px;
-        }
-        .radar-circle::after {
-            content: '';
-            position: absolute;
-            width: 160px;
-            height: 160px;
-            border: 2px dashed rgba(211, 47, 47, 0.4);
-            border-radius: 50%;
-            animation: spin 10s linear infinite;
-        }
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
-        .multiplier-text {
-            font-size: 34px;
-            font-weight: bold;
-            color: #d32f2f;
-            z-index: 2;
-        }
-        .btn-next {
-            background-color: #d32f2f;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            font-size: 15px;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            box-shadow: 0 3px 8px rgba(211, 47, 47, 0.4);
-            margin-bottom: 15px;
-        }
-        .btn-next:active {
-            background-color: #b71c1c;
-            transform: scale(0.98);
-        }
-        .reg-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #ffffff;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            padding: 20px;
-            z-index: 8;
-            text-align: center;
-            overflow-y: auto;
-        }
-        .reg-screen h2 {
-            color: #d32f2f;
-            margin-bottom: 10px;
-            font-size: 20px;
-        }
-        .reg-box {
-            background: #ffebee;
-            border: 1px dashed #d32f2f;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #333;
-            text-align: left;
-            width: 100%;
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
-        .reg-box a {
-            color: #d32f2f;
-            font-weight: bold;
-            word-break: break-all;
-        }
-        .reg-screen input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 15px;
-            text-align: center;
-        }
-        .reg-screen button {
-            width: 100%;
-            padding: 12px;
-            background: #d32f2f;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-        }
-        .admin-modal {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-        }
-        .admin-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            width: 85%;
-            max-width: 320px;
-            text-align: center;
-        }
-        .admin-card h2 {
-            margin-bottom: 15px;
-            color: #333;
-            font-size: 20px;
-        }
-        .admin-card input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-        .admin-card button {
-            width: 100%;
-            padding: 10px;
-            background: #d32f2f;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .error-msg {
-            color: red;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-        .admin-trigger {
-            position: absolute;
-            top: 12px;
-            right: 15px;
-            color: white;
-            font-size: 12px;
-            cursor: pointer;
-            z-index: 5;
-            background: rgba(0,0,0,0.3);
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131c">
+  <meta name="description" content="Aviator-style multiplier demo for entertainment. Results are random simulations, not predictions.">
+  <title>Aviator Signal — Demo</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10131c;
+      --panel: #191e2a;
+      --panel-soft: #202737;
+      --text: #f5f7fb;
+      --muted: #a4aec0;
+      --accent: #ff4058;
+      --accent-dark: #d92642;
+      --line: rgba(255,255,255,.09);
+      --green: #63e6be;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(ellipse at 50% 0%, #27243a 0, var(--bg) 58%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button { font: inherit; }
+    .app {
+      width: min(100%, 440px);
+      min-height: min(780px, calc(100vh - 48px));
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: rgba(25, 30, 42, .96);
+      box-shadow: 0 24px 80px rgba(0,0,0,.4);
+    }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .brand-icon {
+      width: 42px; height: 42px; display: grid; place-items: center;
+      border-radius: 14px; background: rgba(255,64,88,.14); color: var(--accent); font-size: 22px;
+    }
+    h1 { margin: 0; font-size: 17px; letter-spacing: .04em; }
+    .subtitle { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .demo-badge { border: 1px solid rgba(99,230,190,.3); border-radius: 999px; padding: 6px 10px; color: var(--green); font-size: 11px; font-weight: 750; }
+    .notice {
+      padding: 12px 14px; border: 1px solid rgba(255,196,87,.24); border-radius: 14px;
+      background: rgba(255,196,87,.08); color: #ffe0a0; font-size: 12px; line-height: 1.55;
+    }
+    .signal-card {
+      min-height: 300px; padding: 24px 18px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center; overflow: hidden;
+      border: 1px solid var(--line); border-radius: 22px;
+      background: radial-gradient(circle at center, rgba(255,64,88,.12), transparent 58%), var(--panel-soft);
+    }
+    .plane { font-size: 42px; filter: drop-shadow(0 5px 16px rgba(255,64,88,.35)); animation: hover 2.4s ease-in-out infinite; }
+    @keyframes hover { 50% { transform: translateY(-7px) rotate(-4deg); } }
+    .eyebrow { margin: 12px 0 5px; color: var(--muted); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+    .value { min-height: 70px; color: var(--accent); font-size: clamp(48px, 13vw, 66px); font-weight: 850; line-height: 1.1; text-shadow: 0 0 30px rgba(255,64,88,.2); }
+    .result-note { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+    .primary {
+      width: 100%; min-height: 54px; border: 0; border-radius: 14px; background: var(--accent);
+      color: white; font-weight: 800; cursor: pointer; box-shadow: 0 8px 24px rgba(255,64,88,.22);
+      transition: transform .15s, background .15s;
+    }
+    .primary:hover { background: #ff5368; }
+    .primary:active { transform: scale(.985); }
+    button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+    .section-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    h2 { margin: 0; font-size: 14px; }
+    .clear {
+      padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px;
+      background: transparent; color: var(--muted); font-size: 11px; cursor: pointer;
+    }
+    .history { min-height: 78px; display: flex; align-content: flex-start; flex-wrap: wrap; gap: 8px; }
+    .history-item { padding: 8px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-soft); font-size: 13px; font-weight: 700; }
+    .empty { color: var(--muted); font-size: 12px; }
+    footer { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; line-height: 1.6; text-align: center; }
+    @media (max-width: 480px) {
+      body { padding: 0; }
+      .app { min-height: 100vh; border: 0; border-radius: 0; padding: 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; } }
+  </style>
 </head>
 <body>
-    <div class="phone-container">
-        <div class="admin-trigger" onclick="openAdminPanel()">Admin</div>
+  <main class="app">
+    <header>
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">✈</div>
+        <div><h1>AVIATOR SIGNAL</h1><span class="subtitle">Multiplier demo</span></div>
+      </div>
+      <span class="demo-badge">DEMO</span>
+    </header>
 
-        <div class="top-bar">AVIATOR PREDICTOR v12.1</div>
+    <aside class="notice" role="note">
+      <strong>වැදගත්:</strong> මෙය විනෝදාස්වාදය සඳහා පමණක් ඇති අහඹු simulation එකකි. සැබෑ ක්‍රීඩාවක ප්‍රතිඵල පුරෝකථනය නොකරන අතර, ඔට්ටු තැබීමට භාවිතා නොකරන්න.
+    </aside>
 
-        <div class="reg-screen" id="regScreen">
-            <h2>Aviator Signal Activation</h2>
+    <section class="signal-card" aria-label="Simulated multiplier">
+      <div class="plane" aria-hidden="true">✈️</div>
+      <p class="eyebrow">අහඹු demo ප්‍රතිඵලය</p>
+      <div class="value" id="multiplier" aria-live="polite" aria-atomic="true">—</div>
+      <p class="result-note" id="resultNote">ආරම්භ කිරීමට බොත්තම ඔබන්න</p>
+    </section>
 
-            <div class="reg-box">
-                🔗 <a href="Https://1xlite-2781.pro/mobile?bf=d9cd314aaa634_13336605017" target="_blank">Https://1xlite-2781.pro/mobile</a><br>
-                • නව 1xBet ගිනුමක් නිර්මාණය කරගන්න (වන්ක්ලික් රෙජිස්ට්‍රේෂන්)...<br>
-                • 1xBet VIO ප්‍රමෝකෝඩ් <b>1x_6170660</b> ප්‍රමෝ කෝඩ් එක ගහන්න.<br>
-                • ගිනුමට මුදල් තැන්පත් කරන්න... ඔබගේ නව ගිනුමේ ID එක සටහන් කරන්න.
-            </div>
+    <button class="primary" id="generateButton" type="button">අහඹු demo ප්‍රතිඵලයක් සාදන්න</button>
 
-            <p style="font-size: 13px; color: #555; margin-bottom: 10px;">ලබාගත් ඔබගේ 1xBet ගිනුම් ID එක පහතින් ඇතුළත් කරන්න:</p>
-            <input type="text" id="userIdInput" placeholder="Enter Your 1xBet ID" />
-            <button onclick="submitUserId()">Start Signals</button>
-        </div>
+    <section aria-labelledby="historyTitle">
+      <div class="section-heading">
+        <h2 id="historyTitle">මෑත demo ප්‍රතිඵල</h2>
+        <button class="clear" id="clearButton" type="button">ඉතිහාසය මකන්න</button>
+      </div>
+      <div class="history" id="history" aria-live="polite"><span class="empty">තවම ප්‍රතිඵල නැත</span></div>
+    </section>
 
-        <div class="content" id="mainContent" style="display: none;">
-            <div class="plane-box">
-                <svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M520,70 C530,120 540,160 550,210 C545,212 535,170 525,120 Z" fill="#d32f2f"/>
-                    <path d="M510,210 C500,160 490,120 480,70 C485,68 495,110 505,160 Z" fill="#d32f2f"/>
-                    <path d="M80,240 C140,250 240,230 320,180 C400,130 480,90 520,140 C500,160 450,190 380,210 C280,235 150,270 80,240 Z" fill="#d32f2f"/>
-                    <path d="M180,220 C220,190 280,160 350,145 C340,175 300,210 240,235 Z" fill="#b71c1c"/>
-                    <path d="M90,210 L120,160 L150,185 Z" fill="#d32f2f"/>
-                    <path d="M280,165 C310,150 350,140 380,150 C360,165 320,175 280,165 Z" fill="#ffffff" opacity="0.9"/>
-                    <text x="310" y="185" font-family="Arial, sans-serif" font-weight="bold" font-size="28" fill="#ffffff" transform="rotate(-15, 310, 185)">X</text>
-                    <circle cx="280" cy="245" r="10" fill="#222"/>
-                    <circle cx="340" cy="235" r="10" fill="#222"/>
-                </svg>
-            </div>
+    <footer>
+      ප්‍රතිඵල අහඹු ලෙස ජනනය වේ. ඒවාට සැබෑ ගුවන් ක්‍රීඩා හෝ වෙනත් සේවාවක ප්‍රතිඵල සමඟ සම්බන්ධයක් නැත. මුදල් හෝ ගිණුම් තොරතුරු ඇතුළත් කිරීම අවශ්‍ය නොවේ.
+    </footer>
+  </main>
 
-            <div class="radar-circle">
-                <div class="multiplier-text" id="multiplierDisplay">2.02x</div>
-            </div>
+  <script>
+    // These are synthetic demo values only; they do not predict any real game.
+    const demoValues = [1.12, 1.28, 1.54, 1.86, 2.15, 2.72, 3.40, 4.65, 6.20, 9.10];
+    const multiplier = document.getElementById('multiplier');
+    const resultNote = document.getElementById('resultNote');
+    const history = document.getElementById('history');
+    const recentResults = [];
 
-            <button class="btn-next" onclick="nextPrediction()">NEXT PREDICTION</button>
-        </div>
+    function generateDemoResult() {
+      const value = demoValues[Math.floor(Math.random() * demoValues.length)];
+      const formatted = `${value.toFixed(2)}x`;
+      multiplier.textContent = formatted;
+      resultNote.textContent = 'මෙය අහඹු simulation ප්‍රතිඵලයකි — පුරෝකථනයක් නොවේ.';
+      recentResults.unshift(formatted);
+      recentResults.splice(8);
+      renderHistory();
+    }
 
-        <div class="admin-modal" id="adminModal" style="display: none;">
-            <div class="admin-card" id="loginCard">
-                <h2>Admin Login</h2>
-                <input type="email" id="adminEmail" placeholder="Email" />
-                <input type="password" id="adminPass" placeholder="Password" />
-                <button onclick="verifyLogin()">Login</button>
-                <div class="error-msg" id="errorMsg"></div>
-                <button onclick="closeAdmin()" style="background: #555; margin-top: 10px;">Cancel</button>
-            </div>
+    function renderHistory() {
+      history.replaceChildren();
+      if (recentResults.length === 0) {
+        const empty = document.createElement('span');
+        empty.className = 'empty';
+        empty.textContent = 'තවම ප්‍රතිඵල නැත';
+        history.append(empty);
+        return;
+      }
+      recentResults.forEach((result) => {
+        const item = document.createElement('span');
+        item.className = 'history-item';
+        item.textContent = result;
+        history.append(item);
+      });
+    }
 
-            <div class="admin-card" id="controlCard" style="display: none;">
-                <h2>Control Panel</h2>
-                <p style="font-size: 13px; margin-bottom: 10px; color: #666;">Enter Custom 1XBet Value:</p>
-                <input type="text" id="customValue" placeholder="Ex: 5.45x" />
-                <button onclick="setCustomMultiplier()" style="margin-bottom: 8px;">Set Signal</button>
-                <button onclick="closeAdmin()" style="background: #555;">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const mockSignals = ["1.45x", "2.10x", "3.85x", "1.15x", "4.27x", "12.50x", "2.02x", "1.88x", "5.12x"];
-
-        function submitUserId() {
-            const idVal = document.getElementById('userIdInput').value.trim();
-            if (idVal) {
-                document.getElementById('regScreen').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'flex';
-            } else {
-                alert('කරුණාකර ඔබගේ 1xBet ID එක ඇතුළත් කරන්න!');
-            }
-        }
-
-        function nextPrediction() {
-            const display = document.getElementById('multiplierDisplay');
-            const randomSig = mockSignals[Math.floor(Math.random() * mockSignals.length)];
-            display.innerText = randomSig;
-        }
-
-        function openAdminPanel() {
-            document.getElementById('adminModal').style.display = 'flex';
-            if (localStorage.getItem('adminLoggedIn') === 'true') {
-                document.getElementById('loginCard').style.display = 'none';
-                document.getElementById('controlCard').style.display = 'block';
-            } else {
-                document.getElementById('loginCard').style.display = 'block';
-                document.getElementById('controlCard').style.display = 'none';
-            }
-        }
-
-        function verifyLogin() {
-            const email = document.getElementById('adminEmail').value.trim();
-            const pass = document.getElementById('adminPass').value.trim();
-            const err = document.getElementById('errorMsg');
-
-            if (email === 'janitha542sadaru@gmail.com' && pass === 'Sadun991280@') {
-                err.innerText = '';
-                localStorage.setItem('adminLoggedIn', 'true');
-                document.getElementById('loginCard').style.display = 'none';
-                document.getElementById('controlCard').style.display = 'block';
-            } else {
-                err.innerText = 'Invalid Email or Password!';
-            }
-        }
-
-        function setCustomMultiplier() {
-            let val = document.getElementById('customValue').value.trim();
-            if (val) {
-                if (!val.endsWith('x')) val += 'x';
-                document.getElementById('multiplierDisplay').innerText = val;
-                closeAdmin();
-            }
-        }
-
-        function closeAdmin() {
-            document.getElementById('adminModal').style.display = 'none';
-            document.getElementById('adminEmail').value = '';
-            document.getElementById('adminPass').value = '';
-            document.getElementById('customValue').value = '';
-        }
-    </script>
+    document.getElementById('generateButton').addEventListener('click', generateDemoResult);
+    document.getElementById('clearButton').addEventListener('click', () => {
+      recentResults.length = 0;
+      multiplier.textContent = '—';
+      resultNote.textContent = 'ආරම්භ කිරීමට බොත්තම ඔබන්න';
+      renderHistory();
+    });
+  </script>
 </body>
 </html>
